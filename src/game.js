@@ -2,6 +2,31 @@ String.prototype.replaceAt = function(index, character) {
   return this.substr(0, index) + character + this.substr(index+character.length);
 };
 
+var EMPTY = null;
+
+var gamify = function (boardString) {
+  var firstRow = boardString.substr(0, 3);
+  var secondRow = boardString.substr(3, 3);
+  var thirdRow = boardString.substr(6, 3);
+  return '[' + firstRow + '][' + secondRow + '][' + thirdRow + ']';
+};
+
+var ungamify = function (boardString) {
+  return boardString.replace(/[\[\]]+/g,'');
+};
+
+var Move = (function() {
+  function Move(position) {
+    this.position = position;
+  }
+
+  Move.prototype.isValid = function() {
+    return !isNaN(this.position) && this.position >= 0
+  };
+
+  return Move;
+})();
+
 var TicTacToeGame = (function() {
   function TicTacToeGame() {
     this.boardString = '[...][...][...]';
@@ -10,19 +35,45 @@ var TicTacToeGame = (function() {
   }
 
   TicTacToeGame.prototype = {
-    makeMove: function (move) {
-      if (!isNaN(move) && move >= 0) {
-        var this.boardString.replaceAt(move, this.getChar())
-        this.setBoardString()
+    makeMove: function (position) {
+      if (this.getWinner() !== null) { return false; }
+      var move = new Move(position);
+
+      if (!isNaN(move) && move >= 0) { // move is valid
+        var currentPlayerChar = this.getCurrentPlayerChar();
+        var newBoardString = ungamify(this.boardString).replaceAt(move, this.getCurrentPlayerChar());
+        this.setBoardString(gamify(newBoardString));
+        if (this.checkWin()) {
+          this.setWinner(this.getCurrentPlayer());
+        }
       }
-      return false;
+      return false; // move is invalid
+    },
+
+    checkWin: function() {
+      var movesByCurrentPlayer = this.getMovesFor(this.getCurrentPlayerChar());
+      var winningCombinations = ['012', '048', '036', '147', '258', '246', '345', '678'];
+      return winningCombinations.indexOf(movesByCurrentPlayer) !== -1
+    },
+
+    getMovesFor: function (player) {
+      var moveIndexes = [];
+      var boardString = ungamify(this.boardString);
+
+      for(char in boardString) {
+        if(boardString[char] === player) {
+          moveIndexes.push(char);
+        }
+      }
+
+      return moveIndexes.join('');
     },
 
     getBoardString: function () {
       return this.boardString;
     },
 
-    getChar: function () {
+    getCurrentPlayerChar: function () {
       return this.getPlayers()[this.currentPlayer];
     },
 
@@ -31,11 +82,15 @@ var TicTacToeGame = (function() {
     },
 
     getBoard: function() {
-      return [null, null, null, null, null, null, null, null, null];
+      return [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY];
     },
 
     getWinner: function() {
       return this.winner;
+    },
+
+    setWinner: function(winner) {
+      this.winner = winner;
     },
 
     getCurrentPlayer: function() {
@@ -51,11 +106,9 @@ var TicTacToeGame = (function() {
         this.setCurrentPlayer(player);
       }
 
-      if (boardString.length === 15) {
-        if(this.isValid(boardString)) {
-          this.boardString = boardString;
-          return true;
-        };
+      if (boardString.length === 15 && this.isValid(boardString)) {
+        this.boardString = boardString;
+        return true;
       }
 
       return false;
@@ -63,11 +116,13 @@ var TicTacToeGame = (function() {
 
     isValid: function (boardString) {
       var validCharacters = ['X', 'O', '.', '[', ']'];
+
       for(char in boardString) {
-        if(validCharacters.indexOf(boardString[char]) === -1) {
+        if (boardString.hasOwnProperty(char) && validCharacters.indexOf(boardString[char]) === -1) {
           return false;
         }
       }
+
       return true;
     }
   }
