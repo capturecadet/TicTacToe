@@ -1,5 +1,5 @@
 describe('the TicTacToeGame class', function() {
-  fit('should create unique instances', function() {
+  it('should create unique instances', function() {
     var game = new TicTacToeGame();
     var game2 = new TicTacToeGame();
     game.makeMove(2);
