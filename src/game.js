@@ -37,17 +37,21 @@ var TicTacToeGame = (function() {
   TicTacToeGame.prototype = {
     makeMove: function (position) {
       if (this.getWinner() !== null) { return false; }
+
       var move = new Move(position);
 
-      if (!isNaN(move) && move >= 0) { // move is valid
-        var currentPlayerChar = this.getCurrentPlayerChar();
-        var newBoardString = ungamify(this.boardString).replaceAt(move, this.getCurrentPlayerChar());
-        this.setBoardString(gamify(newBoardString));
+      if (move.isValid()) {
+        this.updateBoard(move);
         if (this.checkWin()) {
           this.setWinner(this.getCurrentPlayer());
         }
       }
       return false; // move is invalid
+    },
+
+    updateBoard: function(move) {
+      var updatedBoardString = ungamify(this.boardString).replaceAt(move.position, this.getCurrentPlayerChar());
+      this.setBoardString(gamify(updatedBoardString));
     },
 
     checkWin: function() {
