@@ -25,7 +25,7 @@ var TicTacToeGame = (function() {
     makeMove: function (position) {
       if (this.getWinner() !== null) { return false; }
 
-      if (typeof position === 'number' && position >= 0) {
+      if (typeof position === 'number' && position >= 0 && this.isUnoccupied(position)) {
         this.updateBoard(position);
 
         if (this.checkWin()) {
@@ -47,6 +47,10 @@ var TicTacToeGame = (function() {
 
     checkWin: function() {
       return this.winningCombinations().indexOf(this.getMovesForCurrentPlayer()) !== -1;
+    },
+
+    isUnoccupied: function(position) {
+      return this.boardString[position] === '.';
     },
 
     getMovesForCurrentPlayer: function() {

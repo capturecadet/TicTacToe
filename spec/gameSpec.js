@@ -178,7 +178,7 @@ describe('flow of play', function() {
     expect(boardString).toEqual('[...][.X.][...]');
   });
 
-  fit('- and should retain the O player as the current turn', function() {
+  it('- and should retain the O player as the current turn', function() {
     game.makeMove(4); // remove this
     expect(game.getCurrentPlayer()).toEqual(1);
   });
@@ -198,7 +198,7 @@ describe('flow of play', function() {
   });
 });
 
-xdescribe('given a board which looks like [OXO][.XO][O..]', function() {
+describe('given a board which looks like [OXO][.XO][O..]', function() {
   var game = new TicTacToeGame();
   game.setBoardString('[OXO][.XO][O..]');
 
