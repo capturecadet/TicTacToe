@@ -4,32 +4,19 @@ String.prototype.replaceAt = function(index, character) {
 
 var EMPTY = null;
 
-var gamify = function (boardString) {
-  var firstRow = boardString.substr(0, 3);
-  var secondRow = boardString.substr(3, 3);
-  var thirdRow = boardString.substr(6, 3);
-  return '[' + firstRow + '][' + secondRow + '][' + thirdRow + ']';
+var addBrackets = function (boardString) {
+  return '[' + boardString.substr(0, 3) + ']' +
+         '[' + boardString.substr(3, 3) + ']' +
+         '[' + boardString.substr(6, 3) + ']';
 };
 
-var ungamify = function (boardString) {
+var removeBrackets = function (boardString) {
   return boardString.replace(/[\[\]]+/g,'');
 };
 
-var Move = (function() {
-  function Move(position) {
-    this.position = position;
-  }
-
-  Move.prototype.isValid = function() {
-    return !isNaN(this.position) && this.position >= 0
-  };
-
-  return Move;
-})();
-
 var TicTacToeGame = (function() {
   function TicTacToeGame() {
-    this.boardString = '[...][...][...]';
+    this.boardString = '.........';
     this.currentPlayer = 0;
     this.winner = null;
   }
@@ -38,55 +25,89 @@ var TicTacToeGame = (function() {
     makeMove: function (position) {
       if (this.getWinner() !== null) { return false; }
 
-      var move = new Move(position);
+      if (typeof position === 'number' && position >= 0) {
+        this.updateBoard(position);
 
-      if (move.isValid()) {
-        this.updateBoard(move);
         if (this.checkWin()) {
           this.setWinner(this.getCurrentPlayer());
+        } else if(this.boardIsFull()) {
+          this.setWinner('draw');
         }
+
+        this.setCurrentPlayer(this.nextPlayer());
+        return true;
       }
-      return false; // move is invalid
+
+      return false;
     },
 
-    updateBoard: function(move) {
-      var updatedBoardString = ungamify(this.boardString).replaceAt(move.position, this.getCurrentPlayerChar());
-      this.setBoardString(gamify(updatedBoardString));
+    updateBoard: function(position) {
+      this.boardString = this.boardString.replaceAt(position, this.getCurrentPlayerSymbol());
     },
 
     checkWin: function() {
-      var movesByCurrentPlayer = this.getMovesFor(this.getCurrentPlayerChar());
-      var winningCombinations = ['012', '048', '036', '147', '258', '246', '345', '678'];
-      return winningCombinations.indexOf(movesByCurrentPlayer) !== -1
+      return this.winningCombinations().indexOf(this.getMovesForCurrentPlayer()) !== -1;
+    },
+
+    getMovesForCurrentPlayer: function() {
+      return this.getMovesFor(this.getCurrentPlayerSymbol());
     },
 
     getMovesFor: function (player) {
-      var moveIndexes = [];
-      var boardString = ungamify(this.boardString);
-
-      for(char in boardString) {
-        if(boardString[char] === player) {
-          moveIndexes.push(char);
-        }
-      }
-
-      return moveIndexes.join('');
-    },
-
-    getBoardString: function () {
-      return this.boardString;
-    },
-
-    getCurrentPlayerChar: function () {
-      return this.getPlayers()[this.currentPlayer];
+      return this.boardString.split('').map(function(char, index) {
+        if (char === player) return index;
+      }).join('');
     },
 
     getPlayers: function() {
       return ['X', 'O'];
     },
 
+    getCurrentPlayer: function() {
+      return this.currentPlayer;
+    },
+
+    getCurrentPlayerSymbol: function () {
+      return this.getPlayers()[this.currentPlayer];
+    },
+
+    setCurrentPlayer: function (player) {
+      this.currentPlayer = player;
+    },
+
+    nextPlayer: function() {
+      return (this.getCurrentPlayer() === 0) ? 1 : 0;
+    },
+
     getBoard: function() {
       return [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY];
+    },
+
+    getBoardString: function () {
+      return addBrackets(this.boardString);
+    },
+
+    setBoardString: function(boardString, player) {
+      if (typeof player !== "undefined" && player !== null) {
+        this.setCurrentPlayer(player);
+      }
+
+      if (boardString.length === 15 && this.isValid(boardString)) {
+        this.boardString = removeBrackets(boardString);
+        return true;
+      }
+
+      return false;
+    },
+
+    isValid: function (boardString) {
+      for (var i = 0, l = boardString.length; i < l; i++) {
+        if(['X', 'O', '.', '[', ']'].indexOf(boardString[i]) === -1) {
+          return false;
+        }
+      }
+
+      return true;
     },
 
     getWinner: function() {
@@ -97,37 +118,12 @@ var TicTacToeGame = (function() {
       this.winner = winner;
     },
 
-    getCurrentPlayer: function() {
-      return this.currentPlayer;
+    winningCombinations: function() {
+      return ['012', '048', '036', '147', '258', '246', '345', '678'];
     },
 
-    setCurrentPlayer: function (player) {
-      this.currentPlayer = player;
-    },
-
-    setBoardString: function(boardString, player) {
-      if (typeof player !== "undefined" && player !== null) {
-        this.setCurrentPlayer(player);
-      }
-
-      if (boardString.length === 15 && this.isValid(boardString)) {
-        this.boardString = boardString;
-        return true;
-      }
-
-      return false;
-    },
-
-    isValid: function (boardString) {
-      var validCharacters = ['X', 'O', '.', '[', ']'];
-
-      for(char in boardString) {
-        if (boardString.hasOwnProperty(char) && validCharacters.indexOf(boardString[char]) === -1) {
-          return false;
-        }
-      }
-
-      return true;
+    boardIsFull: function() {
+      return !this.boardString.includes('.');
     }
   }
 

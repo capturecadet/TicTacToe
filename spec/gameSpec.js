@@ -23,7 +23,6 @@ describe('a new game', function() {
 
   it('should have an empty game board', function() {
     var board = game.getBoard();
-    // console.log('new board', board);
     var foundToken = false;
     for (var i = 0; i < board.length; i++) {
       if (board[i] !== null) {
@@ -148,16 +147,15 @@ describe('testing win conditions', function() {
     expect(game.getWinner()).toEqual(0);
   });
 
-  xit('should declare the game a draw if the most recent move filled up the board without winning the game', function() {
+  it('should declare the game a draw if the most recent move filled up the board without winning the game', function() {
     game.setBoardString('[XOX][XO.][OX.]');
     game.makeMove(5);
     game.makeMove(8);
-    // console.log('draw', game.getBoardString());
     expect(game.getWinner()).toEqual('draw');
   });
 });
 
-xdescribe('flow of play', function() {
+describe('flow of play', function() {
   var game = new TicTacToeGame();
 
   it('placing an X in the centre spot should make the board look like [...][.X.][...]', function() {
@@ -180,7 +178,8 @@ xdescribe('flow of play', function() {
     expect(boardString).toEqual('[...][.X.][...]');
   });
 
-  it('- and should retain the O player as the current turn', function() {
+  fit('- and should retain the O player as the current turn', function() {
+    game.makeMove(4); // remove this
     expect(game.getCurrentPlayer()).toEqual(1);
   });
 
