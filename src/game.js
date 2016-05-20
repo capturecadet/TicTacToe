@@ -14,6 +14,21 @@ var removeBrackets = function (boardString) {
   return boardString.replace(/[\[\]]+/g,'');
 };
 
+var toArray = function (boardString) {
+  var boardStringWithBracketsRemoved = boardString.replace(/[\[\]]+/g,'');
+  return [
+    boardStringWithBracketsRemoved.substr(0,3),
+    boardStringWithBracketsRemoved.substr(3,3),
+    boardStringWithBracketsRemoved.substr(6,3)
+  ];
+};
+
+var toString = function(board) {
+  return '[' + board[0] + ']' +
+         '[' + board[1] + ']' +
+         '[' + board[2] + ']';
+};
+
 var TicTacToeGame = (function() {
   function TicTacToeGame() {
     this.boardString = '.........';
